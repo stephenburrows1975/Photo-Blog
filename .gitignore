@@ -185,3 +185,4 @@ static/*.jpg
 static/*.jpeg
 static/*.png
 .env
+.cursorindexingignore
