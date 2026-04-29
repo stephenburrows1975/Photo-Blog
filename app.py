@@ -250,9 +250,21 @@ async def photo_uploader(req: Request, photo: UploadFile, description:str, locat
         ContentType='image/jpeg'
     )
     
-    url = f"{os.getenv('S3_ENDPOINT')}/{os.getenv('S3_BUCKET')}/{filename}"
+    url - f"/image/{filename}"
     photos.insert(description=description, url=url, location=location, date=datetime.now().strftime('%Y-%m-%d'))
     return RedirectResponse('/photos', status_code=303)
+
+@rt('/image/{filename}')
+def serve_image(filename: str, req: Request):
+    if not req.cookies.get('user'):
+        return RedirectResponse('/')
+    s3 = boto3.client('s3',
+        endpoint_url=os.getenv('S3_ENDPOINT'),
+        aws_access_key_id=os.getenv('S3_ACCESS_KEY'),
+        aws_secret_access_key=os.getenv('S3_SECRET_KEY')
+    )
+    obj = s3.get_object(Bucket=os.getenv('S3_BUCKET'), Key=filename)
+    return Response(content=obj['Body'].read(), media_type='image/jpeg')
 
 @app.post('/register')
 def register_post(reg: Registration, website:str=''):
