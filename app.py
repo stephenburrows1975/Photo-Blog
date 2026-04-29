@@ -227,6 +227,7 @@ async def photo_uploader(req: Request, photo: UploadFile, description:str, locat
     
     filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{photo.filename}"
     filebuffer = await photo.read()
+    filename_noext = filename.rsplit('.', 1)[0]
     
     # Resize/compress with Pillow
     from PIL import Image
@@ -245,12 +246,12 @@ async def photo_uploader(req: Request, photo: UploadFile, description:str, locat
         
     s3.put_object(
         Bucket=os.getenv('S3_BUCKET'),
-        Key=filename,
+        Key=filename_noext,
         Body=filebuffer,
         ContentType='image/jpeg'
     )
     
-    url = f"/img/{filename}"
+    url = f"/img/{filename_noext}"
     photos.insert(description=description, url=url, location=location, date=datetime.now().strftime('%Y-%m-%d'))
     return RedirectResponse('/photos', status_code=303)
 
