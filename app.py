@@ -38,7 +38,7 @@ if not photos():
     photos.insert(description="My first photo", url="https://picsum.photos/600/400", location="London", date="2026-03-31")
     
 if not users():
-    users.insert(username="steve@steve.com", password=hash_password("testpass123"), name="Steve Burrows", is_admin=1)
+    users.insert(username="steve", password=hash_password("testpass123"), name="Steve Burrows", is_admin=1, is_approved=1)
 
 @rt('/')
 def get(req: Request):
