@@ -228,11 +228,26 @@ async def photo_uploader(req: Request, photo: UploadFile, description:str, locat
     filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{photo.filename}"
     filebuffer = await photo.read()
     
+    # Resize/compress with Pillow
+    from PIL import Image
+    import io
+    img = Image.open(io.BytesIO(filebuffer))
+    img = img.convert('RGB')
+    if img.width > 1200:
+        ratio = 1200 / img.width
+        img = img.resize((1200, int(img.height * ratio)))
+    output = io.BytesIO()
+    img.save(output, format='JPEG', quality=85)
+    filebuffer = output.getvalue()
+
+    if len(filebuffer) > 2 * 1024 * 1024:
+        return "File too large even after compression - please use a smaller image"
+        
     s3.put_object(
         Bucket=os.getenv('S3_BUCKET'),
         Key=filename,
         Body=filebuffer,
-        ContentType=photo.content_type
+        ContentType='image/jpeg'
     )
     
     url = f"{os.getenv('S3_ENDPOINT')}/{os.getenv('S3_BUCKET')}/{filename}"
