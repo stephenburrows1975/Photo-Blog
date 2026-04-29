@@ -186,3 +186,4 @@ static/*.jpeg
 static/*.png
 .env
 .cursorindexingignore
+static/styles.css
