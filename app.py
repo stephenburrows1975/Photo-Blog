@@ -250,7 +250,7 @@ async def photo_uploader(req: Request, photo: UploadFile, description:str, locat
         ContentType='image/jpeg'
     )
     
-    url - f"/image/{filename}"
+    url = f"/image/{filename}"
     photos.insert(description=description, url=url, location=location, date=datetime.now().strftime('%Y-%m-%d'))
     return RedirectResponse('/photos', status_code=303)
 
