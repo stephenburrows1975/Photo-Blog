@@ -216,19 +216,27 @@ def upload_page(req: Request):
 
 @app.post('/upload')
 async def photo_uploader(req: Request, photo: UploadFile, description:str, location:str):
-    user = users(where=f"username='{req.cookies.get('user')}'")
-    if not req.cookies.get('user'):
-        return RedirectResponse('/')
-    if not user or not user[0]['is_admin']:
-        return "Access denied"
-    # Save the photo to the static directory
+    result = admin_checker(users, req)
+    if not isinstance(result, int): return result
+    
+    s3 = boto3.client('s3',
+        endpoint_url=os.getenv('S3_ENDPOINT'),
+        aws_access_key_id=os.getenv('S3_ACCESS_KEY'),
+        aws_secret_access_key=os.getenv('S3_SECRET_KEY')
+    )
+    
     filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{photo.filename}"
-    filepath = f"static/{filename}"
     filebuffer = await photo.read()
-    with open(filepath, "wb") as f:
-        f.write(filebuffer)
-    # Insert photo metadata into the database
-    photos.insert(description=description, url=f"/static/{filename}", location=location, date=datetime.now().strftime('%Y-%m-%d'))
+    
+    s3.put_object(
+        Bucket=os.getenv('S3_BUCKET'),
+        Key=filename,
+        Body=filebuffer,
+        ContentType=photo.content_type
+    )
+    
+    url = f"{os.getenv('S3_ENDPOINT')}/{os.getenv('S3_BUCKET')}/{filename}"
+    photos.insert(description=description, url=url, location=location, date=datetime.now().strftime('%Y-%m-%d'))
     return RedirectResponse('/photos', status_code=303)
 
 @app.post('/register')
