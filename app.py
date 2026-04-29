@@ -254,7 +254,7 @@ async def photo_uploader(req: Request, photo: UploadFile, description:str, locat
     photos.insert(description=description, url=url, location=location, date=datetime.now().strftime('%Y-%m-%d'))
     return RedirectResponse('/photos', status_code=303)
 
-@rt('/image/{filename}')
+@app.get('/image/{filename}')
 def serve_image(filename: str, req: Request):
     if not req.cookies.get('user'):
         return RedirectResponse('/')
