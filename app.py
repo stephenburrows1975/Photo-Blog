@@ -4,6 +4,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from helpers import *
 from starlette.staticfiles import StaticFiles
+from dotenv import load_dotenv
+import os
+import boto3
+
+load_dotenv()
+
 #comment test
 @dataclass
 class Registration: 
